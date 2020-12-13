@@ -4,56 +4,92 @@ import '../node_modules/@pnotify/core/dist/PNotify.css'
 import '../node_modules/@pnotify/core/dist/Angeler.css'
 import '../node_modules/@pnotify/core/dist/BrightTheme.css'
 import '../node_modules/@pnotify/core/dist/Material.css'
-// import templete from './template.hbs';
-// import debounce from 'lodash.debounce'
-const nameUrl = "https://restcountries.eu/rest/v2/name/{name}";
+import debounce from 'lodash.debounce';
+import cardCountry from "./template/cardCountry.hbs";
+import listCountry from "./template/listCountry.hbs";
+
 const finder = document.querySelector(".finder");
 const content = document.querySelector(".content");
+const baseUrl = 'https://restcountries.eu/rest/v2/name';
+let foundedCountry = '';
 
-const getData = (e) => {
-    console.log(e.target.value);
-    fetch(`https://restcountries.eu/rest/v2/name/${e.target.value}`)
+const fetchCountries = (searchQuery) => {
+    // console.log(e.target.value);
+    fetch(`${baseUrl}/${searchQuery}`)
         .then((response) => { return response.json() })
-        .then((data) => {
-            content.innerHTML = `<ul>${data.reduce((acc, item) => {
-                acc += createMarkup(item);
-                return acc;
-            }, ""
-            )}</ul>`
-        }
-
-        );
+        .then((data) => { console.log(data) })
 };
 
-
-const createMarkup = (country) => {
-    `<li>
-    <h2>${country.name}</h2>
-    </li>
-    `
+function onSearch() {
+    // resetSearch();
+    foundedCountry = finder.value;
+    fetchCountries(foundedCountry)
+        .then(renderMarkup)
+        .catch(err => console.log(err));
 }
 
-finder.addEventListener("input", getData);
+function renderMarkup(countries) {
+    if (countries.length === 1) {
+        // resetSearch();
+        markupContries(cardCountry, countries);
+    } else if (countries.length > 1 && countries.length <= 10) {
+        // resetSearch();
+        markupContries(listCountry, countries);
+    } else if (countries.length > 10) {
+        resultMessage(
+            error,
+            'To many matches found. Please enter a more specific query!',
+        );
+    } else {
+        resultMessage(alert, 'No matches found!');
+    }
+}
+function resetSearch() {
+    content.innerHTML = '';
+}
 
+function onSearch() {
+    resetSearch();
+    foundedCountry = finder.value;
+    countriesApi(foundedCountry)
+        .then(renderMarkup)
+        .catch(err => console.log(err));
+}
 
+function resultMessage(typeInfo, textInfo) {
+    typeInfo({
+        text: `${textInfo}`,
+        delay: 1000,
+        closerHover: true,
+    });
+}
+function markupContries(tpl, countries) {
+    content.insertAdjacentHTML('beforeend', tpl(countries));
+}
 
-const myAlert = alert({
-    title: 'Attention!!!!',
-    text: "I'm an alert.",
-    type: 'info'
-});
-console.log(myAlert);
+finder.addEventListener("input", debounce(() => {
+    onSearch();
+}, 500),
+);
 
-const myError = error({
-    title: 'Error',
-    text: "I'm an error.",
-    type: 'error'
-});
-console.log(myError);
+// ==============================================
+// const myAlert = alert({
+//     title: 'Attention!!!!',
+//     text: "No matches found!",
+//     type: 'info'
+// });
+// console.log(myAlert);
 
-const myNotice = notice({
-    title: 'Notice',
-    text: "I'm an notice.",
-    type: 'error'
-});
-console.log(myNotice)
+// const myError = error({
+//     title: 'Error',
+//     text: "Too many matches found. Please enter a more specific query!",
+//     type: 'error'
+// });
+// console.log(myError);
+
+// const myNotice = notice({
+//     title: 'Notice',
+//     text: "Too many matches found. Please enter a more specific query!",
+//     type: 'error'
+// });
+// console.log(myNotice)
