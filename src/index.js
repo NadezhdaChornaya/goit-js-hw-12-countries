@@ -16,24 +16,24 @@ const errorAlert = (text) => error({
     text: `${text}`,
     sticker: false,
     closer: false,
-    delay: 4000,
+    delay: 2000,
 })
 
 const getMarkup = (countries) => {
     if (countries.length > 10) errorAlert("Too many matches found. Please enter a more specific query!").open()
-    else if (countries.length > 1 && countries.length <= 10) refs.content.innerHTML = listCountry(countries)
-    else if (countries.length === 1) refs.content.innerHTML = cardCountry(countries)
+    else if (countries.length > 1 && countries.length <= 10) refs.contentRef.innerHTML = listCountry(countries)
+    else if (countries.length === 1) refs.contentRef.innerHTML = cardCountry(countries)
     else if (countries.status === 404) errorAlert("Country with this name wasn't found. Please enter a more specific query!").open()
 
 }
 
 const onSearchCountry = () => {
-    refs.content.innerHTML = '';
-    if (refs.finder.value.length > 0) {
-        fetchCountries(refs.finder.value)
+    refs.contentRef.innerHTML = '';
+    if (refs.finderRef.value.length) {
+        fetchCountries(refs.finderRef.value)
             .then(data => getMarkup(data));
     }
 };
 
-refs.finder.addEventListener('input', debounce(onSearchCountry, 500));
+refs.finderRef.addEventListener('input', debounce(onSearchCountry, 500));
 

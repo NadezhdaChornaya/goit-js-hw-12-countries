@@ -1,4 +1,4 @@
 export const refs = {
-    finder: document.querySelector(".finder"),
-    content: document.querySelector(".content"),
+    finderRef: document.querySelector(".finder"),
+    contentRef: document.querySelector(".content"),
 }
